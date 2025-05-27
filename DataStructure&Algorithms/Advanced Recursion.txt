@@ -1,0 +1,402 @@
+					
+//Write a function that generates all valid combinations of n pairs of parentheses
+//Example: for n=3, one valid combination is "()()()"
+
+
+// This program is using backtracking approach - поиск с возвратом
+
+#include <string>
+#include <vector>
+#include <iostream>
+#include <type_traits>
+
+namespace accesTo = std;
+using Integer = int;
+using String = accesTo::string;
+using Vector = accesTo::vector<String>;
+// statick_assert is a compile-time construct.  Эта строка вообще не существует в бинарном коде после компиляции. Она просто говорит компилятору: “Если шаблонные параметры неправильные — выбрось ошибку на этапе компиляции”
+
+template<typename T, typename Y, typename Z>
+Z validParentheses(T n, T open = 0, T close = 0,const Y& nStr = "", Z& result) {
+	static_assert( // this step we are doing only 1 time always while compiling and that's all. Static_assert is a compiler checking work!
+		accesTo::is_same<T, Integer>::value &&
+		accesTo::is_same<Y, String>::value &&
+		accesTo::is_same <Z, Vector>::value,
+		"Type must be only Int or String or Vector!"
+		);
+
+	if (open == n && close == n) {
+		result.push_back(nStr);
+		//return; we can it writes if it is not the final result of function
+	}
+
+	if (open < n) {
+		validParentheses<T, Y, Z>(n, open + 1, close, nStr + "(", result);
+	}
+	
+	if (close < open) {
+		validParentheses<T, Y, Z>(n, open, close + 1, nStr + ")", result);
+	}
+
+	return result;
+}
+
+
+Recursion description 
+
+Run stack:
+1. Frame.
+Containce parameters of first function we are calling it in main.
+List of parameters looks like: 
+T 3, T open = 0, T close = 0, const Y& nStr = "", Z& result = {}.
+
+
+So we are in validParentheses function now.
+We always here have 4 blocks of code to go through.
+1)
+	if (0 == 3 && 0 == 3) {
+		result.push_back(nStr);
+	}
+It is false so we do nothing.
+2)
+	if (0 < 3) {
+		validParentheses<T, Y, Z>(n, open + 1, close, nStr + "(", result);
+	}
+It is correct! So we are doing body now.
+The body is: 
+	validParentheses<T, Y, Z>(3, 0 + 1, close, nStr  = {}+ "(", result);
+And we have in the body calling of new function.
+
+
+
+
+Run stack:
+2. Frame.
+Containce calling of validParenthes of new parameters 
+T 3, T open = 1, T close = 0, copy of const Y& nStr = "(".
+
+
+So we are continue with a new function calling and to previos we willl back when we will cleaning stack.
+So we are starting again.
+	if (1 == 3 && 0 == 3) {
+		result.push_back(nStr);
+	}
+It is false!
+The next one:
+	if (1 < 3) {
+		validParentheses<T, Y, Z>(n, open + 1, close, nStr + "(", result);
+	}
+it is true!
+So we are doing the body:
+validParentheses<T, Y, Z>(n, open + 1, close, nStr + "(", result);
+
+
+
+Run stack:
+3.  Frame. We are calling new function, so we have new parameters of it:
+T 3, T open = 2 , T close = 0, third copy of nStr = "((", result = {}
+
+
+From function of farme 3 we are starting again.
+1)
+	if (2== 3 && 0 == 3) {
+		result.push_back(nStr);
+	}
+It is false!
+2)
+	if (2 < 3) {
+		validParentheses<T, Y, Z>(n, open + 1, close, nStr + "(", result);
+	}
+It is correct!
+
+Run stack:
+4. Frame.
+List of new parameters: 
+T 3, T open = 3, T close = 0, forth copy of nStr = "(((", result = {}
+
+
+1)
+	if (3 == 3 && 0 == 3) {
+		result.push_back(nStr);
+	}
+It is false! Skipping!
+2)
+	if (3 < 3) {
+		validParentheses<T, Y, Z>(n, open + 1, close, nStr + "(", result);
+	}
+This is also false! Skipping!
+3)
+	if (0 < 3) {
+		validParentheses<T, Y, Z>(n, open, close + 1, nStr + ")", result);
+	}
+This is correct, so doing the body!
+
+
+
+Run stack:
+5. Frame.
+List of parameters:
+T 3, T open = 3, T close = 1, fifth copy of nStr = "((()", result = {}
+
+
+1)
+	if (3 == 3 && 1 == 3) {
+		result.push_back(nStr);
+	}
+It is false!
+2)
+	if (3 < 3) {
+		validParentheses<T, Y, Z>(n, open + 1, close, nStr + "(", result);
+	}
+It isfalse!
+3)
+	if (1 < 3) {
+		validParentheses<T, Y, Z>(n, open, close + 1, nStr + ")", result);
+	}
+It is true!
+So we are doing the body!
+
+
+Run stack:
+6. Frame.
+List of parameters:
+T 3, T open = 3, T close = 2, sixth copy of nStr = "((())", result = {}
+
+
+
+1)
+	if (3 == 3 && 2 == 3) {
+		result.push_back(nStr);
+	}
+False!
+2)
+	if (3 < 3) {
+		validParentheses<T, Y, Z>(n, open + 1, close, nStr + "(", result);
+	}
+False!
+3)
+	if (2 < 3) {
+		validParentheses<T, Y, Z>(n, open, close + 1, nStr + ")", result);
+	}
+Go ahead!
+
+
+Run stack:
+7.Frame.
+List of parameters:
+T 3,  T open = 3, T close = 3, sevens copy of  const Y& nStr = "((()))", result = {}.
+
+
+1)
+	if (3 == 3 && 3 == 3) {
+		result.push_back(nStr);
+	}
+It is correct!
+So doing the body:
+	result.push_back(nStr);
+And now result = { "((()))"} We passt it by referance! No copys!
+2)
+	if (3 < 3) {
+		validParentheses<T, Y, Z>(n, open + 1, close, nStr + "(", result);
+	}
+False!
+3)
+	if (3 < 3) {
+		validParentheses<T, Y, Z>(n, open, close + 1, nStr + ")", result);
+	}
+False!
+4)
+	return result;
+
+
+
+So in this step the function from frame 7 full completed!
+And the compiler starts to clean Run satck!
+So frame 7 was deleted!
+To understant correct all proces we are asking myself where we were stopped during 6 frame? To delete complete stack firstly we should finish all functions runs!
+We were completed 3) block so now we can also make return result; and we did it! So now frame 6th was deleted!
+Now farme 5!
+Where we stopped it?
+At 3) so now doing return result; !
+Frame 5th was deleted!
+Frame 4th!
+Where we were stopped it?
+At 3) stage so now we can do only return result;
+And we did it! After that farme 4th was deleted!
+
+
+
+Now we are in frame 3.
+We finishedd it at 2!
+So let's do 3).
+Our current parameters are :
+T 3, T open = 2 , T close = 0, third copy of nStr = "((", result = {}.
+
+So for finishing working with farme 3 we should run the next block of code: 
+	if (0 < 3) {
+		validParentheses<T, Y, Z>(n, open, close + 1, nStr + ")", result);
+	}
+
+
+Run stack:
+4.Frame.
+List of parameters:
+T 3, T open = 2 , T close = 1, 4th copy of nStr = "(()", result = {"((()))"}.
+
+
+1)
+	if (2 == 3 && 1 == 3) {
+		result.push_back(nStr);
+	}
+False!
+2)
+	if (2 < 3) {
+		validParentheses<T, Y, Z>(n, open + 1, close, nStr + "(", result);
+	}
+True! Let's doing it!
+
+
+
+Run stack:
+5.Frame.
+List of parameters:
+T 3, T open = 3, T close = 1, 5th copy of nStr = "(()(", result = {"((()))"}.
+
+
+1)
+	if (3 ==3 && 1 == 3) {
+		result.push_back(nStr);
+	}
+False!
+2)
+	if ( 3 < 3) {
+		validParentheses<T, Y, Z>(n, open + 1, close, nStr + "(", result);
+	}
+False!
+3)
+	if (1 < 3) {
+		validParentheses<T, Y, Z>(n, open, close + 1, nStr + ")", result);
+	}
+Go ahead!
+4) - 
+
+
+Run stack:
+6.Frame.
+List of parameters:
+T 3, T open = 3, T close = 2, 6th copy of nStr = "(()()", result = {"((()))"}.
+
+
+1)	
+if (3 == 3 && 2 == 3) {
+		result.push_back(nStr);
+	}
+False!
+2)
+	if (3 < 3) {
+		validParentheses<T, Y, Z>(n, open + 1, close, nStr + "(", result);
+	}
+False!
+3)
+	if (2 < 3) {
+		validParentheses<T, Y, Z>(n, open, close + 1, nStr + ")", result);
+	}
+Go ahead!
+
+
+Run stack:
+7.Frame.
+List of parameters:
+T 3, T open = 3, T close = 3,  7th copy of nStr = "(()())", result = {"((()))"}.
+
+
+1) 	if (3 == 3 && 3 == 3) {
+		result.push_back(nStr);
+	}
+We can do the body!
+
+
+So result rn looks like {"((()))", "(()())" }.
+
+
+2) 	if (3 < 3) {
+		validParentheses<T, Y, Z>(n, open + 1, close, nStr + "(", result);
+	}
+False!
+3) 	if (3 < 3) {
+		validParentheses<T, Y, Z>(n, open, close + 1, nStr + ")", result);
+	}
+False!
+4)
+	return result;
+Frame 7 was deleted!
+
+Rn we are in 6 frame.
+Where the function from frame 6 was finished its work?
+We have only 	return result; step.
+So we are doing it! And then the function was finished with its work!
+And its was deleted from run stack! 6 frame is not exist in run stack!
+let's go to farme 5!
+So we have only 4 step and we are doing it and the function completed  its work!
+Frame 5 was deleted from run stack!
+
+So we have only 4 frames rn!
+Let's excetuting function from frame 4.
+Its List of parameters: 
+T 3, T open = 2 , T close = 1, 4th copy of nStr = "(()", result = {"((()))"}.
+So now we should so step
+3)
+	if (1 < 2) {
+		validParentheses<T, Y, Z>(n, open, close + 1, nStr + ")", result);
+	}
+
+Is it correct!
+
+
+
+Run stack:
+5.Frame.
+Its List of parameters: 
+T 3, T open = 2 , T close = 2, 5th copy of nStr = "(())", result = {"((()))", "(()())"}.
+
+
+
+
+1)
+	if (2 == 3 && 2 == 3) {
+		result.push_back(nStr);
+	}
+False!
+2)
+	if (2 < 3) {
+		validParentheses<T, Y, Z>(n, open + 1, close, nStr + "(", result);
+	}
+
+
+Run stack:
+6.Frame.
+Its List of parameters: 
+T 3, T open = 3 , T close = 2, 6th copy of nStr = "(())(", result = {"((()))", "(()())"}.
+
+1)
+	if (3 == 3 && 2 == 3) {
+		result.push_back(nStr);
+	}
+False!
+2)
+	if (3 < 3) {
+		validParentheses<T, Y, Z>(n, open + 1, close, nStr + "(", result);
+	}
+False!
+3)
+	if (2 < 3) {
+		validParentheses<T, Y, Z>(n, open, close + 1, nStr + ")", result);
+	}
+Correct!
+
+
+Run stack:
+7.Frame.
+Its List of parameters: 
+T 3, T open = 3 , T close = 3, 6th copy of nStr = "(())()", result = {"((()))", "(()())"}.
+
