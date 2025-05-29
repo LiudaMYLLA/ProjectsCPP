@@ -28,13 +28,15 @@ public:
 	void addAtTheEnd(T data);
 	void addAtThePosition(T data, Integer pos);
 
-	void deleteFromPosition(); // l want to use recursion here in learning goal
+	void deleteFromPosition(Integer pos); // l want to use recursion here in learning goals
 	void deleteAll();
 
 	void printRecursive();
 	void IsContainsValueRecursive();
 private:
-	void addAtThePositionRecursive(T data, Integer pos, Node<T>* ptr, Integer); // l want to use recursion here in learning goal
+	void deleteAllRecursive(Node<T>* ptr, Integer i);
+	void addAtThePositionRecursive(T data, Integer pos, Node<T>* ptr, Integer i); // l want to use recursion here in learning goals
+	void deleteFromPositionRecursive(Integer pos, Node<T>* ptr, Integer i);
 };
 
 template<typename T>
@@ -144,4 +146,90 @@ void CDLL<T>::addAtThePositionRecursive(T data, Integer pos, Node<T>* ptr, Integ
 		return;
 	}
 	addAtThePositionRecursive(data, pos, ptr->next, i + 1);
+}
+
+template<typename T>
+void CDLL<T>::deleteFromPosition(Integer pos) {
+	if (!head) {
+		return;
+	}
+
+	deleteFromPositionRecursive(pos, head, 0);
+}
+
+template<typename T>
+void CDLL<T>::deleteFromPositionRecursive(Integer pos, Node<T>* ptr, Integer i) {
+
+	if (ptr == head && i != 0) {
+		std::cout << "Position is invalid!" << "\n";
+		return;
+	}
+
+	if (pos == i) {
+		if (head == tail) {
+			head->next = nullptr;
+			head->prev = nullptr;
+			delete head;
+			head = tail = nullptr;
+			return;
+		}
+
+		if (ptr == head) {
+			Node<T>* nextNode = nullptr;
+			nextNode = head->next;
+			nextNode->prev = tail;
+			tail->next = nextNode;
+			delete head;
+			head = nextNode;
+			return;
+		}
+
+		if (ptr == tail) {
+			Node<T>* prevNode = nullptr;
+			prevNode = tail->prev;
+			prevNode->next = head;
+			head->prev = prevNode;
+			delete tail;
+			tail = prevNode;
+			return;
+		}
+
+		Node<T>* next = nullptr;
+		Node<T>* prev = nullptr;
+		next = ptr->next;
+		prev = ptr->prev;
+		prev->next = next;
+		next->prev = prev;
+		delete ptr;
+	}
+
+
+	deleteFromPositionRecursive(pos, ptr->next, i + 1);
+}
+
+template<typename T>
+void CDLL<T>::deleteAll() {
+	if (head == nullptr) { return; }
+
+	deleteAllRecursive(head, 0);
+}
+
+template<typename T>
+void CDLL<T>::deleteAllRecursive(Node<T>* ptr, Integer i) {
+
+	if (ptr == head && i > 0) {
+		return;
+	}
+
+	if (ptr == tail) {
+		delete ptr;
+		head = tail = nullptr;
+		std::cout << i + 1 << "elements was deleted!" << "\n";
+		return;
+	}
+
+	deleteAllRecursive(ptr->next, i + 1);
+	
+	delete ptr;
+
 }
