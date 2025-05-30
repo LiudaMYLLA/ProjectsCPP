@@ -23,7 +23,6 @@ private:
 	Node<T>* tail = nullptr;
 public:
 	CDLL(){}
-	~CDLL(){}
 	void addAtTheBeginning(T data);
 	void addAtTheEnd(T data);
 	void addAtThePosition(T data, Integer pos);
@@ -31,18 +30,21 @@ public:
 	void deleteFromPosition(Integer pos); // l want to use recursion here in learning goals
 	void deleteAll();
 
-	void printRecursive();
-	void IsContainsValueRecursive();
+	void printAllInBackOrder() const ;
+	bool IsContainsValue(T data) const;
+	~CDLL() { deleteAll(); }
 private:
+	bool IsContainsValueRecursive(T data, Node<T>* ptr, Integer i) const;
 	void deleteAllRecursive(Node<T>* ptr, Integer i);
 	void addAtThePositionRecursive(T data, Integer pos, Node<T>* ptr, Integer i); // l want to use recursion here in learning goals
 	void deleteFromPositionRecursive(Integer pos, Node<T>* ptr, Integer i);
+	void printAllRecursive(Node<T>* ptr, Integer i) const; 
 };
 
 template<typename T>
 void CDLL<T>::addAtTheBeginning(T data) {
 	static_assert(
-		std::is_same<T, int>::value ||
+		std::is_same<T, Integer>::value ||
 		std::is_same<T, double>::value ||
 		std::is_same<T, String>::value,
 		"Type is incorrect! Try again!!"
@@ -224,12 +226,53 @@ void CDLL<T>::deleteAllRecursive(Node<T>* ptr, Integer i) {
 	if (ptr == tail) {
 		delete ptr;
 		head = tail = nullptr;
-		std::cout << i + 1 << "elements was deleted!" << "\n";
+		std::cout << i + 1 << "  elements were deleted!" << "\n";
 		return;
 	}
 
 	deleteAllRecursive(ptr->next, i + 1);
 	
 	delete ptr;
+}
 
+template<typename T>
+void CDLL<T>::printAllInBackOrder() const  {
+	if (head == nullptr) { return; }
+
+	printAllRecursive(head, 0);
+}
+
+template<typename T>
+void CDLL<T>::printAllRecursive(Node<T>* ptr, Integer i) const {
+
+	if (ptr == head && i > 0) {
+		return;
+	}
+	if (ptr == tail) {
+		std::cout << ptr->data << "\n";
+		return;
+	}
+
+	printAllRecursive(ptr->next, i + 1);
+
+	std::cout << ptr->data << "\n";
+}
+
+template<typename T>
+bool CDLL<T>::IsContainsValue(T data) const {
+	if (head == nullptr) { return false; }
+
+	return IsContainsValueRecursive(data, head, 0);
+}
+
+template<typename T>
+bool CDLL<T>::IsContainsValueRecursive(T data, Node<T>* ptr, Integer i) const {
+
+	if (ptr == head && i > 0) { return false; }
+	if (ptr->data == data) {
+		return true;
+	}
+
+
+	 return IsContainsValueRecursive(data, ptr->next, i + 1);
 }
