@@ -1,0 +1,94 @@
+[
+    {
+        "classes": [
+            {
+                "className": "Wrapper",
+                "lineNumber": 5,
+                "methods": [
+                    {
+                        "access": "public",
+                        "arguments": [
+                            {
+                                "name": "value",
+                                "type": "QVariant"
+                            }
+                        ],
+                        "index": 0,
+                        "name": "addAtTheBeginning",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "arguments": [
+                            {
+                                "name": "value",
+                                "type": "QVariant"
+                            }
+                        ],
+                        "index": 1,
+                        "name": "addAtTheEnd",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "arguments": [
+                            {
+                                "name": "data",
+                                "type": "QVariant"
+                            },
+                            {
+                                "name": "pos",
+                                "type": "QVariant"
+                            }
+                        ],
+                        "index": 2,
+                        "name": "addAtThePosition",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 3,
+                        "name": "deleteAll",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "arguments": [
+                            {
+                                "name": "pos",
+                                "type": "QVariant"
+                            }
+                        ],
+                        "index": 4,
+                        "name": "deleteFromPosition",
+                        "returnType": "void"
+                    },
+                    {
+                        "access": "public",
+                        "index": 5,
+                        "isConst": true,
+                        "name": "getAll",
+                        "returnType": "QVariantList"
+                    },
+                    {
+                        "access": "public",
+                        "index": 6,
+                        "isConst": true,
+                        "name": "printAllInBackOrder",
+                        "returnType": "void"
+                    }
+                ],
+                "object": true,
+                "qualifiedClassName": "Wrapper",
+                "superClasses": [
+                    {
+                        "access": "public",
+                        "name": "QObject"
+                    }
+                ]
+            }
+        ],
+        "inputFile": "wrapper.h",
+        "outputRevision": 69
+    }
+]
