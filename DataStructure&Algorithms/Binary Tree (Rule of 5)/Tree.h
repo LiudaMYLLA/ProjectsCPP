@@ -1,22 +1,27 @@
-﻿#include "Node.h"
+
+
+#pragma once
+#include "Node.h"
 #include <iostream>
 #include <string>
 #include <utility>
 
 template<typename T>
-class Tree {
+class BTree {
 private:
 	Node<T>* root = nullptr;
 public:
 	// Rule of 5
-	Tree() noexcept = default;		
-	explicit Tree(const Tree& other) noexcept; // copy constructor : deep copy,noexcept, RAII
-	explicit Tree(Tree&& other) : root(other.root)  noexcept;	   // move constructor : std::move, noexcept, Rule of 5
+	BTree() noexcept = default;
+	BTree(const BTree& other) noexcept; // copy constructor : deep copy,noexcept, RAII
+	BTree(BTree&& other) : root(other.root) {
+		(*this).root = nullptr;
+	}// move constructor : std::move, noexcept, Rule of 5
 
-	Tree& operator=(const Tree& other) noexcept; // copy assignment operator : deep copy,noexcept, RAII
-	Tree& operator=(Tree&& other) noexcept; // move assignment operator : std::move, noexcept, Rule of 5
+	BTree& operator=(const BTree& other) noexcept; // copy assignment operator : deep copy,noexcept, RAII
+	BTree& operator=(BTree&& other) noexcept; // move assignment operator : std::move, noexcept, Rule of 5
 
-	~Tree() noexcept = default;
+	~BTree() noexcept = default;
 public:
 	void insert(const T& data) noexcept;
 	void insert(T&& data) noexcept;
@@ -26,8 +31,8 @@ private:
 	void insertMoveRecursive(T&& data, Node<T>* node) noexcept;
 };
 
-template<typename T>				
-explicit Tree<T>::Tree(const Tree<T>& other) noexcept{
+template<typename T>
+BTree<T>::BTree(const BTree<T>& other) noexcept {
 	*this = other; // when l will write 13 func clone_subtree l will use here deep copy
 }  //Tree tree2 = tree1; 
 
@@ -51,13 +56,9 @@ explicit Tree<T>::Tree(const Tree<T>& other) noexcept{
 //	other.root = nullptr;
 //}
 
-template<typename T>
-explicit Tree<T>::Tree(Tree&& other): root(other.root) noexcept {
-	other.root = nullptr;
-}
 
 template<typename T>
-Tree<T>& Tree<T>::operator=(const Tree& other) noexcept {
+BTree<T>& BTree<T>::operator=(const BTree& other) noexcept {
 	if (this != &other) {
 		(*this).root = other.root;  // when l will write 13 func clone_subtree l will use here deep copy
 	}
@@ -65,7 +66,7 @@ Tree<T>& Tree<T>::operator=(const Tree& other) noexcept {
 } //tree2 = tree1;
 
 template<typename T>
-Tree<T>& Tree<T>::operator=(Tree&& other) noexcept {
+BTree<T>& BTree<T>::operator=(BTree&& other) noexcept {
 	if (this != &other) {
 		// add deleteSubtree()
 		this->root = other.root;
@@ -75,10 +76,10 @@ Tree<T>& Tree<T>::operator=(Tree&& other) noexcept {
 }
 
 template<typename T>
-void Tree<T>::insertRecursive(const T& data, Node<T>* node) noexcept{
+void BTree<T>::insertRecursive(const T& data, Node<T>* node) noexcept {
 	if (data >= node->data) {
 		if (node->right == nullptr) {
-			Node<T>* newNode = new Node(data); // calling parametarized constructor
+			Node<T>* newNode = new Node<T>(data); // calling parametarized constructor
 			node->right = newNode;
 			return;
 		}
@@ -86,7 +87,7 @@ void Tree<T>::insertRecursive(const T& data, Node<T>* node) noexcept{
 	}
 	else if (data < node->data) {
 		if (node->left == nullptr) {
-			Node<T>* newNode = new Node(data); 
+			Node<T>* newNode = new Node<T>(data);
 			node->left = newNode;
 			return;
 		}
@@ -95,9 +96,9 @@ void Tree<T>::insertRecursive(const T& data, Node<T>* node) noexcept{
 }
 
 template<typename T>
-void Tree<T>::insert(const T& data) noexcept {
+void BTree<T>::insert(const T& data) noexcept {
 	if (root == nullptr) {
-		Node<T>* newNode = new Node(data); 
+		Node<T>* newNode = new Node<T>(data);
 		root = newNode;
 	}
 	else {
@@ -107,10 +108,10 @@ void Tree<T>::insert(const T& data) noexcept {
 
 // using universal reference
 template<typename T>
-void Tree<T>::insertMoveRecursive(T&& data, Node<T>* node) noexcept {
+void BTree<T>::insertMoveRecursive(T&& data, Node<T>* node) noexcept {
 	if (data >= node->data) {
 		if (node->right == nullptr) {
-			Node<T>* newNode = new Node(std::move(data)); // calling parametarized constructor
+			Node<T>* newNode = new Node<T>(std::move(data)); // calling parametarized constructor
 			node->right = newNode;
 			return;
 		}
@@ -118,7 +119,7 @@ void Tree<T>::insertMoveRecursive(T&& data, Node<T>* node) noexcept {
 	}
 	else if (data < node->data) {
 		if (node->left == nullptr) {
-			Node<T>* newNode = new Node(std::move(data));
+			Node<T>* newNode = new Node<T>(std::move(data));
 			node->left = newNode;
 			return;
 		}
@@ -127,18 +128,15 @@ void Tree<T>::insertMoveRecursive(T&& data, Node<T>* node) noexcept {
 }
 
 template<typename T>
-void Tree<T>::insert(T&& data) noexcept {
+void BTree<T>::insert(T&& data) noexcept {
 	if (root == nullptr) {
-		Node<T>* newNode = new Node(std::move(data));
+		Node<T>* newNode = new Node<T>(std::move(data));
 		root = newNode;
 	}
 	else {
 		insertMoveRecursive(std::move(data), root);
 	}
 }
-
-
-
 
 
 
