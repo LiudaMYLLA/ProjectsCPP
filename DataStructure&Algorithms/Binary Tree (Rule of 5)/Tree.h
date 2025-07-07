@@ -1,5 +1,3 @@
-
-
 #pragma once
 #include "Node.h"
 #include <iostream>
@@ -26,9 +24,11 @@ public:
 	void insert(const T& data) noexcept;
 	void insert(T&& data) noexcept;
 	//void emplace(Args&&... args);  Write cool with C++17
+	bool isContain(const T data) noexcept;
 private:
 	void insertRecursive(const T& data, Node<T>* node) noexcept;
 	void insertMoveRecursive(T&& data, Node<T>* node) noexcept;
+	bool searchRecursive(const T& data, Node<T>* node) noexcept;
 };
 
 template<typename T>
@@ -138,6 +138,32 @@ void BTree<T>::insert(T&& data) noexcept {
 	}
 }
 
+template<typename T>
+bool BTree<T>::searchRecursive(const T& data, Node<T>* node) noexcept {
+	if (node->left == nullptr || node->right == nullptr) {
+		if (node->data == data) {
+			return true;
+		}
+		return false
+	}else {
+		bool result = searchRecursive(data, node->left);
+		if (result == true) return true;
+	}
+
+		if (node->data == data) {
+			return true;
+		}else if (node->right != nullptr) {
+			bool result = searchRecursive(data, node->right);
+			if (result == true) return true;
+		}
+	return false;
+}
+
+template<typename T>
+bool BTree<T>::isContain(const T data) {
+	bool result = searchRecursive(data, root);
+	return result;
+}
 
 
 
