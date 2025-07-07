@@ -1,0 +1,119 @@
+ How's working
+
+template<typename T>
+bool BTree<T>::searchRecursive(const T& data, Node<T>* node) noexcept {
+	if (node->left == nullptr || node->right == nullptr) {
+		if (node->data == data) {
+			return true;
+		}
+		return false
+	}else {
+		bool result = searchRecursive(data, node->left);
+		if (result == true) return true;
+	}
+
+		if (node->data == data) {
+			return true;
+		}else if (node->right != nullptr) {
+			bool result = searchRecursive(data, node->right);
+			if (result == true) return true;
+		}
+	return false;
+}
+
+template<typename T>
+bool BTree<T>::isContain(const T data) {
+	bool result = searchRecursive(data, root);
+	return result;
+} 
+
+
+      10
+     /   \
+   8      13
+  / \    /  \
+ 2   6	11   20
+
+Search: 20
+
+2 calls of searchRecursive 
+
+I am in 10.
+1. if (node->left == nullptr || node->right == nullptr) {
+- no
+2. else {
+- yes 
+ 2.1. bool result = searchRecursive(data, node->left);
+  
+
+3 calls 
+
+l am in 8.
+1. if (node->left == nullptr || node->right == nullptr) {
+- no
+2. else { 
+- yes
+ 2.1. bool result = searchRecursive(data, node->left);
+
+4 calls
+
+l am in 2.
+1. if (node->left == nullptr || node->right == nullptr) {
+- yes
+2. if (node->data == data) {
+- no
+3. return false ( false did so 4 calls no exist)     !
+
+Right now we in 3 calls 
+3. if (node->data == data) {
+- no
+4. else if (node->right != nullptr) {
+- yes 
+ 4.1 bool result = searchRecursive(data, node->right);
+
+5 calls
+
+l am in 6.
+1. if (node->left == nullptr || node->right == nullptr) {
+- yes
+ 1.1 if (node->data == data) {
+- no 
+1.2 return false ( false did so 5 calls no exist)     !
+
+Right now we in 3 calls 
+5. return false;
+ ( false did so 3 calls no exist)  		      !
+
+
+2 calls
+3. if (node->data == data) { 
+- no
+4. }else if (node->right != nullptr) {
+- yes 
+ 4.1 bool result = searchRecursive(data, node->right);
+
+6 calls
+l am in 13.
+1.if (node->left == nullptr || node->right == nullptr) {
+- no
+2. }else {
+ 2.1. bool result = searchRecursive(data, node->left);
+
+7 calls 
+
+l am in 20.
+1. if (node->left == nullptr || node->right == nullptr) {
+- yes
+2. if (node->data == data) {
+- yes
+ 2.1. return true;
+ ( true did so 7 calls no exist)  		      !
+
+l am in 6 calls
+ 2.2  if (result == true) return true;
+6 calls finished
+
+l am in 2 calls 
+4.2 if (result == true) return true;
+2 calls finished
+
