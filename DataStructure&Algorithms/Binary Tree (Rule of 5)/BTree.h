@@ -1,8 +1,9 @@
 #pragma once
 #include "Node.h"
+#include "myException.h"
 #include <iostream>
 #include <string>
-#include <utility>
+#include <utility> // For std::make, std::pair
 
 template<typename T>
 class BTree {
@@ -24,11 +25,14 @@ public:
 	void insert(const T& data) noexcept;
 	void insert(T&& data) noexcept;
 	//void emplace(Args&&... args);  Write cool with C++17
-	bool isContain(const T data) noexcept;
+	bool isContain(const T& data) noexcept;
+	void remove(const T& data);
+	auto empty() noexcept;
 private:
 	void insertRecursive(const T& data, Node<T>* node) noexcept;
 	void insertMoveRecursive(T&& data, Node<T>* node) noexcept;
 	bool searchRecursive(const T& data, Node<T>* node) noexcept;
+	std::pair<Node<T>*, Node<T>*> searchForDeletingRecursive(const T& data, Node<T>* node, Node<T>* parent) noexcept;
 };
 
 template<typename T>
@@ -144,7 +148,7 @@ bool BTree<T>::searchRecursive(const T& data, Node<T>* node) noexcept {
 		if (node->data == data) {
 			return true;
 		}
-		return false
+		return false;
 	}else {
 		bool result = searchRecursive(data, node->left);
 		if (result == true) return true;
@@ -160,22 +164,127 @@ bool BTree<T>::searchRecursive(const T& data, Node<T>* node) noexcept {
 }
 
 template<typename T>
-bool BTree<T>::isContain(const T data) {
+bool BTree<T>::isContain(const T& data) noexcept{
+	if (root == nullptr) {
+		return false;
+	}
+	else if (root != nullptr
+		&& root->left == nullptr
+		&& root->right == nullptr
+		&& data == root->data) {
+		return true;
+	}
 	bool result = searchRecursive(data, root);
 	return result;
 }
 
+template<typename T>
+std::pair<Node<T>*, Node<T>*> BTree<T>::searchForDeletingRecursive(const T& data, Node<T>* node, Node<T>* parent) noexcept{
+
+	if (node->left == nullptr && node->right == nullptr) { 
+		if (node->data == data) {
+			return { node, parent };
+		}
+		return { nullptr, nullptr };
+	} // Or: return std::make_pair(node, parent); Or:  return { node, parent };
 
 
+	if (node->left != nullptr) {
+		std::pair<Node<T>*,Node<T>*> dNode_pNode = searchForDeletingRecursive(data, node->left, node);
+		if (dNode_pNode.first != nullptr && dNode_pNode.first->data == data) { return dNode_pNode; }
+	}
+
+	if (node->right != nullptr) {
+		std::pair<Node<T>*,Node<T>*> dNode_pNode = searchForDeletingRecursive(data, node->right, node);
+		if (dNode_pNode.first != nullptr && dNode_pNode.first->data == data) { return dNode_pNode; }
+	}
+
+	return { nullptr, nullptr };
+}
+
+
+template<typename T>
+void BTree<T>::remove(const T& data) {
+	if (root == nullptr) {
+		return;
+	}
+	else if (root != nullptr 
+		&& root->left == nullptr 
+		&& root->right == nullptr 
+		&& data == root->data) {
+		delete root;
+		root = nullptr;
+	}
+	else {
+		// Type auto or:
+		std::pair<Node<T>*,Node<T>*> dNode_pNode = searchForDeletingRecursive(data, root, root);
+
+		if (dNode_pNode.first == nullptr || dNode_pNode.first->data != data) {
+			try {
+				throw errorDataNotExist;
+			}
+			catch(const std::exception& e){
+				std::cout << e.what() << "\n";
+			}
+		}
+		if (dNode_pNode.first->left == nullptr && dNode_pNode.first->right == nullptr) {
+			if (dNode_pNode.second->left == dNode_pNode.first) {
+				dNode_pNode.second->left = nullptr;
+				delete dNode_pNode.first;
+			}
+			else if (dNode_pNode.second->right == dNode_pNode.first) {
+				dNode_pNode.second->right = nullptr;
+				delete dNode_pNode.first;
+			}
+		}
+		else if (dNode_pNode.first->left == nullptr && dNode_pNode.first->right != nullptr) {
+			if (dNode_pNode.second->right == dNode_pNode.first) {
+				dNode_pNode.second->right = dNode_pNode.first->right;
+				dNode_pNode.first->right = nullptr;
+				delete dNode_pNode.first;
+			}
+			else if (dNode_pNode.second->left == dNode_pNode.first) {
+				dNode_pNode.second->left = dNode_pNode.first->right;
+				dNode_pNode.first->right = nullptr;
+				delete dNode_pNode.first;
+			}
+		}
+		else if (dNode_pNode.first->left != nullptr && dNode_pNode.first->right == nullptr) {
+			if (dNode_pNode.second->right == dNode_pNode.first) {
+				dNode_pNode.second->right = dNode_pNode.first->left;
+				dNode_pNode.first->left = nullptr;
+				delete dNode_pNode.first;
+			}
+			else if (dNode_pNode.second->left == dNode_pNode.first) {
+				dNode_pNode.second->left = dNode_pNode.first->left;
+				dNode_pNode.first->left = nullptr;
+				delete dNode_pNode.first;
+			}
+		}
+		else if (dNode_pNode.first->left != nullptr && dNode_pNode.first->right != nullptr) {
+			// Logic with deleting with 2 children
+		}
+	}
+}
+
+template<typename T>
+auto BTree<T>::empty() noexcept {
+	if (root == nullptr) {
+		return "Tree is empty";
+	}
+	else {
+		return "Tree is not empty";
+	}
+}
 
 // Complete list of methods:
 //+  1. insert( const T& )	Вставка копированием
 //+ 2. insert( T&& )			Вставка с перемещением
-// 3. contains( const T& )  Поиск значения
+//+ 3. contains( const T& )  Поиск значения
 // 4. remove( const T& )    Удаление узла (с балансировкой поддеревьев)
 // 5. clear()				Очистка дерева
 // 6. size() const			Количество элементов
-// 7. empty() const			Проверка на пустоту
+//+ 7. empty() const			Проверка на пустоту
 
 // 8. min(), max()			Вернуть минимальный/максимальный элемент
 // 9. height()				Высота дерева
