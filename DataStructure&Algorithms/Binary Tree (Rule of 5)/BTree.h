@@ -33,6 +33,7 @@ private:
 	void insertMoveRecursive(T&& data, Node<T>* node) noexcept;
 	bool searchRecursive(const T& data, Node<T>* node) noexcept;
 	std::pair<Node<T>*, Node<T>*> searchForDeletingRecursive(const T& data, Node<T>* node, Node<T>* parent) noexcept;
+	std::pair<Node<T>*, Node<T>*> findMaxInSubTreeRecursive(Node<T>* node, Node<T>* parent) noexcept;
 };
 
 template<typename T>
@@ -202,6 +203,13 @@ std::pair<Node<T>*, Node<T>*> BTree<T>::searchForDeletingRecursive(const T& data
 	return { nullptr, nullptr };
 }
 
+template<typename T>
+std::pair<Node<T>*,Node<T>*> BTree<T>::findMaxInSubTreeRecursive(Node<T>* node, Node<T>* parent) noexcept{
+	if (node->right == nullptr) {
+		return { node, parent };
+	}
+	return findMaxInSubTreeRecursive(node->right, node);
+}
 
 template<typename T>
 void BTree<T>::remove(const T& data) {
@@ -262,7 +270,11 @@ void BTree<T>::remove(const T& data) {
 			}
 		}
 		else if (dNode_pNode.first->left != nullptr && dNode_pNode.first->right != nullptr) {
-			// Logic with deleting with 2 children
+			// I can use min from right-subtree or max from left-subtree
+			auto newData = findMaxInSubTreeRecursive(dNode_pNode.first->left, dNode_pNode.second);
+			dNode_pNode.first->data = newData.first->data;
+			newData.second->right = nullptr;
+			delete newData.first;
 		}
 	}
 }
@@ -281,7 +293,7 @@ auto BTree<T>::empty() noexcept {
 //+  1. insert( const T& )	Вставка копированием
 //+ 2. insert( T&& )			Вставка с перемещением
 //+ 3. contains( const T& )  Поиск значения
-// 4. remove( const T& )    Удаление узла (с балансировкой поддеревьев)
+//+ 4. remove( const T& )    Удаление узла (с балансировкой поддеревьев)
 // 5. clear()				Очистка дерева
 // 6. size() const			Количество элементов
 //+ 7. empty() const			Проверка на пустоту
