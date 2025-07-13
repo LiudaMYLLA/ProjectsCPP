@@ -20,7 +20,9 @@ public:
 	BTree& operator=(const BTree& other) noexcept; // copy assignment operator : deep copy,noexcept, RAII
 	BTree& operator=(BTree&& other) noexcept; // move assignment operator : std::move, noexcept, Rule of 5
 
-	~BTree() noexcept = default;
+	~BTree() noexcept {
+		clear();
+	}
 public:
 	void insert(const T& data) noexcept;
 	void insert(T&& data) noexcept;
@@ -28,12 +30,14 @@ public:
 	bool isContain(const T& data) noexcept;
 	void remove(const T& data);
 	auto empty() noexcept;
+	void clear() noexcept;
 private:
 	void insertRecursive(const T& data, Node<T>* node) noexcept;
 	void insertMoveRecursive(T&& data, Node<T>* node) noexcept;
 	bool searchRecursive(const T& data, Node<T>* node) noexcept;
 	std::pair<Node<T>*, Node<T>*> searchForDeletingRecursive(const T& data, Node<T>* node, Node<T>* parent) noexcept;
 	std::pair<Node<T>*, Node<T>*> findMaxInSubTreeRecursive(Node<T>* node, Node<T>* parent) noexcept;
+	void clearRecursive(Node<T>* node) noexcept;
 };
 
 template<typename T>
@@ -289,12 +293,46 @@ auto BTree<T>::empty() noexcept {
 	}
 }
 
+template<typename T>
+void BTree<T>::clearRecursive(Node<T>* node) noexcept {
+	if (node->left == nullptr && node->right == nullptr) {
+		delete node;
+		return;
+	}
+
+	if (node->left != nullptr) {
+		clearRecursive(node->left);
+	}
+
+	if (node->right != nullptr) {
+		clearRecursive(node->right);
+	}
+
+	delete node;
+}
+
+template<typename T>
+void BTree<T>::clear() noexcept {
+	if (root == nullptr) {
+		return;
+	}else {
+		clearRecursive(root);
+		root = nullptr;
+	}
+}
+
+
+
+
+
+
+
 // Complete list of methods:
 //+  1. insert( const T& )	Вставка копированием
 //+ 2. insert( T&& )			Вставка с перемещением
 //+ 3. contains( const T& )  Поиск значения
 //+ 4. remove( const T& )    Удаление узла (с балансировкой поддеревьев)
-// 5. clear()				Очистка дерева
+//+ 5. clear()				Очистка дерева
 // 6. size() const			Количество элементов
 //+ 7. empty() const			Проверка на пустоту
 
