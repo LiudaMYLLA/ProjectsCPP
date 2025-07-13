@@ -323,53 +323,104 @@ void BTree<T>::clear() noexcept {
 
 
 
-
-
-
-
 // Complete list of methods:
-//+  1. insert( const T& )	Вставка копированием
-//+ 2. insert( T&& )			Вставка с перемещением
-//+ 3. contains( const T& )  Поиск значения
-//+ 4. remove( const T& )    Удаление узла (с балансировкой поддеревьев)
-//+ 5. clear()				Очистка дерева
-// 6. size() const			Количество элементов
-//+ 7. empty() const			Проверка на пустоту
 
-// 8. min(), max()			Вернуть минимальный/максимальный элемент
-// 9. height()				Высота дерева
+
+//+  1. insert( const T& )		
+// noexcept, RAII, deep copy
+// 
+//+ 2. insert( T&& )	
+// 	T&&, std::move, perfect forwarding, noexcept
+// 
+//+ 3. contains( const T& )  
+// [[nodiscard]], structure bindings, auto, std::optional<Node*>
+// 
+//+ 4. remove( const T& )   
+// std::pair, structured bindings, RAII, noexcept
+// 
+//+ 5. clear()		
+// 	RAII	
+// 
+// 6. size() const
+// 	constexpr, std::atomic, [[nodiscard]]
+// 		
+//+ 7. empty() const
+//	[[nodiscard]], noexcept	
+
+
+
+// 8. min()
+// std::optional<T>, structured bindings
+// 
+// 9. max()	
+// std::optional<T>, structured bindings
+// 		
 // 10.
-// printInOrder(),
-// printPreOrder()			Печать содержимого дерева
+// height()	
+// 	constexpr, tail recursion or stack		
 // 11.
-// begin(), end()			Итераторы (range-for)
-// emplace(args...)			Вставка по perfect forwarding
-// operator==, operator!=	Сравнение двух деревьев
-
+// printInOrder()
+// lambda, std::function, traverse(lambda)
+// 
 // 12.
-// traverse(λ)				Обход дерева с пользовательской функцией (лямбдой)
-// balance()				Перестроение дерева для баланса (если не AVL/Red-Black)
+// printPreOrder()
+// lambda, std::function, traverse(lambda)
+// 			
 // 13.
-// copy()					Глубокая копия дерева
-// clone_subtree(Node*)		Клонирование поддерева
+// begin()
+// range-for, custom iterator, std::iterator_traits, std::move_iterator
+// 
 // 14.
-// node_count(),
-// leaf_count()				Статистика
-// 15.
-// is_balanced()			Проверка сбалансированности
+// end()
+// range-for, custom iterator, std::iterator_traits, std::move_iterator
+// 
+// 15.			
+// emplace(args...)
+// variadic templates, std::forward, T&&, emplace
+// 			
 // 16.
-// to_vector()				Перевод в std::vector<T>
+// operator==
+// SFINAE, constexpr, std::tie
+// 
 // 17.
+// operator!=
+// SFINAE, constexpr, std::tie	
+
+
+
+
+// 18.
+// traverse(λ)	
+// std::function, lambda, std::bind, concepts(C++20)
+// 
+// 19.			
+// balance()
+// to_vector + from_sorted_vector, std::sort, constexpr
+// 				
+// 20.
+// copy()	
+// deep copy, clone_subtree
+// 
+// 21.				
+// clone_subtree(Node*)	
+// RAII, move	
+// 
+// 22.
+// node_count()
+// constexpr, fold expressions
+// 
+// 23.
+// leaf_count()	
+// constexpr, fold expressions
+// 			
+// 24.
+// is_balanced()
+// std::pair, structured bindings	
+// 		
+// 25.
+// to_vector()	
+// std::vector<T>, inorder traversal, emplace_back
+// 			
+// 26.
 // from_vector( const std::vector<T>& )
-//							Построение дерева из отсортированного массива
-
-
-
-
-
-
-
-// noexept means it will no runtime error (thow)
-
-// keyword explicit used for avoiding implicity type assingment and it forbidden in signs construcrors like (=).
-//So we  can do like myClass a(b); And forbidden like myClass a = b;
+//	recursive mid-point, std::vector::at, constexpr	
