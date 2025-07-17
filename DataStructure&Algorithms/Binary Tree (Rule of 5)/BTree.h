@@ -1,19 +1,19 @@
-#pragma once
 #include "Node.h"
 #include "myException.h"
 #include <iostream>
 #include <string>
-#include <utility> // For std::make, std::pair
+#include <utility> // For std::move, std::pair
+
 
 template<typename T>
-class BTree {
+class [[nodiscard]] BTree {
 private:
 	Node<T>* root = nullptr;
 public:
 	// Rule of 5
 	BTree() noexcept = default;
 	BTree(const BTree& other) noexcept; // copy constructor : deep copy,noexcept, RAII
-	BTree(BTree&& other) : root(other.root) {
+	BTree(BTree&& other) : root(other.root) noexcept {
 		(*this).root = nullptr;
 	}// move constructor : std::move, noexcept, Rule of 5
 
@@ -26,18 +26,19 @@ public:
 public:
 	void insert(const T& data) noexcept;
 	void insert(T&& data) noexcept;
-	//void emplace(Args&&... args);  Write cool with C++17
-	bool isContain(const T& data) noexcept;
+	[[nodiscard]] bool isContain(const T& data) noexcept;
 	void remove(const T& data);
-	auto empty() noexcept;
+	[[nodiscard]] bool empty() const noexcept;
 	void clear() noexcept;
+	[[nodiscard]] int size() const noexcept;
 private:
 	void insertRecursive(const T& data, Node<T>* node) noexcept;
 	void insertMoveRecursive(T&& data, Node<T>* node) noexcept;
-	bool searchRecursive(const T& data, Node<T>* node) noexcept;
-	std::pair<Node<T>*, Node<T>*> searchForDeletingRecursive(const T& data, Node<T>* node, Node<T>* parent) noexcept;
+	[[nodiscard]] bool searchRecursive(const T& data, Node<T>* node) noexcept;
+	std::pair<Node<T>*, Node<T>*>& searchForDeletingRecursive(const T& data, Node<T>* node, Node<T>* parent) noexcept;
 	std::pair<Node<T>*, Node<T>*> findMaxInSubTreeRecursive(Node<T>* node, Node<T>* parent) noexcept;
 	void clearRecursive(Node<T>* node) noexcept;
+	[[nodiscard]] int size(Node<T>* node) const noexcept;
 };
 
 template<typename T>
@@ -148,7 +149,7 @@ void BTree<T>::insert(T&& data) noexcept {
 }
 
 template<typename T>
-bool BTree<T>::searchRecursive(const T& data, Node<T>* node) noexcept {
+[[nodiscard]] bool BTree<T>::searchRecursive(const T& data, Node<T>* node) noexcept {
 	if (node->left == nullptr || node->right == nullptr) {
 		if (node->data == data) {
 			return true;
@@ -169,7 +170,7 @@ bool BTree<T>::searchRecursive(const T& data, Node<T>* node) noexcept {
 }
 
 template<typename T>
-bool BTree<T>::isContain(const T& data) noexcept{
+[[nodiscard]] bool BTree<T>::isContain(const T& data) noexcept{
 	if (root == nullptr) {
 		return false;
 	}
@@ -184,7 +185,7 @@ bool BTree<T>::isContain(const T& data) noexcept{
 }
 
 template<typename T>
-std::pair<Node<T>*, Node<T>*> BTree<T>::searchForDeletingRecursive(const T& data, Node<T>* node, Node<T>* parent) noexcept{
+std::pair<Node<T>*, Node<T>*>& BTree<T>::searchForDeletingRecursive(const T& data, Node<T>* node, Node<T>* parent) noexcept{
 
 	if (node->left == nullptr && node->right == nullptr) { 
 		if (node->data == data) {
@@ -195,12 +196,12 @@ std::pair<Node<T>*, Node<T>*> BTree<T>::searchForDeletingRecursive(const T& data
 
 
 	if (node->left != nullptr) {
-		std::pair<Node<T>*,Node<T>*> dNode_pNode = searchForDeletingRecursive(data, node->left, node);
+		decltype(auto) dNode_pNode = searchForDeletingRecursive(data, node->left, node);
 		if (dNode_pNode.first != nullptr && dNode_pNode.first->data == data) { return dNode_pNode; }
 	}
 
 	if (node->right != nullptr) {
-		std::pair<Node<T>*,Node<T>*> dNode_pNode = searchForDeletingRecursive(data, node->right, node);
+		std::pair<Node<T>*,Node<T>*>& dNode_pNode = searchForDeletingRecursive(data, node->right, node);
 		if (dNode_pNode.first != nullptr && dNode_pNode.first->data == data) { return dNode_pNode; }
 	}
 
@@ -284,12 +285,12 @@ void BTree<T>::remove(const T& data) {
 }
 
 template<typename T>
-auto BTree<T>::empty() noexcept {
+[[nodiscard]] bool BTree<T>::empty() const noexcept {
 	if (root == nullptr) {
-		return "Tree is empty";
+		return true;
 	}
 	else {
-		return "Tree is not empty";
+		return false;
 	}
 }
 
@@ -321,15 +322,47 @@ void BTree<T>::clear() noexcept {
 	}
 }
 
+template<typename T>
+[[nodiscard]] int BTree<T>::size(Node<T>* node) const noexcept {
+	int size = 0;
+
+	if (node->left == nullptr && node->right == nullptr) {
+		size += 1;
+		return size;
+	}
+
+	if (node->left != nullptr) {
+		size += size(node->left);
+	}
+
+	if (node->right != nullptr) {
+		size += size(node->right);
+	}
+
+	size += 1;
+	return size;
+}
+
+template<typename T>
+[[nodiscard]] int BTree<T>::size() const noexcept{
+	if (empty()) return 0;
+	if (root->left == nullptr && root->right == nullptr) return 1;
+
+	int result = size(root);
+	return result;
+}
+
+
+
+
 
 
 // Complete list of methods:
 
-
-//+  1. insert( const T& )		
+//++ 1. insert( const T& )		
 // noexcept, RAII, deep copy
 // 
-//+ 2. insert( T&& )	
+//++ 2. insert( T&& )	
 // 	T&&, std::move, perfect forwarding, noexcept
 // 
 //+ 3. contains( const T& )  
@@ -338,13 +371,13 @@ void BTree<T>::clear() noexcept {
 //+ 4. remove( const T& )   
 // std::pair, structured bindings, RAII, noexcept
 // 
-//+ 5. clear()		
+//++ 5. clear()		
 // 	RAII	
 // 
-// 6. size() const
-// 	constexpr, std::atomic, [[nodiscard]]
+//++ 6. size() const
+// 	[[nodiscard]]
 // 		
-//+ 7. empty() const
+//++ 7. empty() const
 //	[[nodiscard]], noexcept	
 
 
