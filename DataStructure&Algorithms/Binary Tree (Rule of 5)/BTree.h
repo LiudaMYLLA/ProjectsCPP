@@ -4,6 +4,9 @@
 #include <string>
 #include <utility> // For std::move, std::pair
 
+namespace tags {
+	struct manualMoveTag {};
+}
 
 template<typename T>
 class [[nodiscard]] BTree {
@@ -12,17 +15,24 @@ private:
 public:
 	// Rule of 5
 	BTree() noexcept = default;
+
 	BTree(const BTree& other) noexcept; // copy constructor : deep copy,noexcept, RAII
-	BTree(BTree&& other) : root(other.root) noexcept {
-		(*this).root = nullptr;
-	}// move constructor : std::move, noexcept, Rule of 5
+	
+	// Two move constructors are intentionally kept:
+	// 1. Optimized version (used in practice)
+	// 2. Deprecated manual version (kept for historical reference and learning)
+	BTree(BTree&& other) noexcept;
+	[[deprecated("Move constructor manual an not optimized")]] 
+	BTree(BTree<T>&& other, [[maybe_unused]] tags::manualMoveTag) noexcept;
 
 	BTree& operator=(const BTree& other) noexcept; // copy assignment operator : deep copy,noexcept, RAII
+
 	BTree& operator=(BTree&& other) noexcept; // move assignment operator : std::move, noexcept, Rule of 5
 
 	~BTree() noexcept {
 		clear();
 	}
+
 public:
 	void insert(const T& data) noexcept;
 	void insert(T&& data) noexcept;
@@ -42,30 +52,23 @@ private:
 };
 
 template<typename T>
+BTree<T>::BTree(BTree&& other) noexcept : root(other.root) {
+	other.root = nullptr;
+}
+
+template<typename T>
 BTree<T>::BTree(const BTree<T>& other) noexcept {
 	*this = other; // when l will write 13 func clone_subtree l will use here deep copy
 }  //Tree tree2 = tree1; 
 
-//template<typename T>						 Not optimal
-//explicit Tree<T>::Tree(Tree&& other) noexcept{
-//		*this = std::move(other);
-//		other.root = nullptr;
-//}
-
-
-//template<typename T>						 Manual move constructor
-//explicit Tree<T>::Tree(Tree&& other) noexcept {
-//	this->root = other.root;
-//	other.root = nullptr;
-//}
-
-//											 Manual move constructor
-//template<typename T>
-//explicit Tree<T>::Tree(Tree&& other) noexcept {
-//	(*this).root = other.root;
-//	other.root = nullptr;
-//}
-
+template<typename T>						 
+[[deprecated("Move constructor manual an not optimized")]] 
+BTree<T>::BTree(BTree<T>&& other, [[maybe_unused]] tags::manualMoveTag) noexcept {
+		*this = std::move(other); 
+		// or this->root = other.root;
+		// or (*this).root = other.root;
+		other.root = nullptr;
+}
 
 template<typename T>
 BTree<T>& BTree<T>::operator=(const BTree& other) noexcept {
@@ -351,8 +354,6 @@ template<typename T>
 	int result = size(root);
 	return result;
 }
-
-
 
 
 
