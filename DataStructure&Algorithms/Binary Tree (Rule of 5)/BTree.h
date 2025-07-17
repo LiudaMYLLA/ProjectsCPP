@@ -16,7 +16,7 @@ public:
 	// Rule of 5
 	BTree() noexcept = default;
 
-	BTree(const BTree& other) noexcept; // copy constructor : deep copy,noexcept, RAII
+	BTree(const BTree& other) noexcept; //deep copy
 	
 	// Two move constructors are intentionally kept:
 	// 1. Optimized version (used in practice)
@@ -25,9 +25,9 @@ public:
 	[[deprecated("Move constructor manual an not optimized")]] 
 	BTree(BTree<T>&& other, [[maybe_unused]] tags::manualMoveTag) noexcept;
 
-	BTree& operator=(const BTree& other) noexcept; // copy assignment operator : deep copy,noexcept, RAII
+	BTree& operator=(const BTree& other) noexcept; //deep copy
 
-	BTree& operator=(BTree&& other) noexcept; // move assignment operator : std::move, noexcept, Rule of 5
+	BTree& operator=(BTree&& other) noexcept; 
 
 	~BTree() noexcept {
 		clear();
@@ -353,8 +353,6 @@ template<typename T>
 	int result = size(root);
 	return result;
 }
-
-
 
 
 // Complete list of methods:
