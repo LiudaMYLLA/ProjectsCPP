@@ -119,7 +119,6 @@ void BTree<T>::insert(const T& data) noexcept {
 	}
 }
 
-// using universal reference
 template<typename T>
 void BTree<T>::insertMoveRecursive(T&& data, Node<T>* node) noexcept {
 	if (data >= node->data) {
