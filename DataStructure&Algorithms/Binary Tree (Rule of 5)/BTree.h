@@ -22,7 +22,7 @@ public:
 	// 1. Optimized version (used in practice)
 	// 2. Deprecated manual version (kept for historical reference and learning)
 	BTree(BTree&& other) noexcept;
-	[[deprecated("Move constructor manual an not optimized")]] 
+	[[deprecated("Move constructor manual and not optimized")]] 
 	BTree(BTree<T>&& other, [[maybe_unused]] tags::manualMoveTag) noexcept;
 
 	BTree& operator=(const BTree& other) noexcept; //deep copy
@@ -62,7 +62,7 @@ BTree<T>::BTree(const BTree<T>& other) noexcept {
 }  //Tree tree2 = tree1; 
 
 template<typename T>						 
-[[deprecated("Move constructor manual an not optimized")]] 
+[[deprecated("Move constructor manual and not optimized")]] 
 BTree<T>::BTree(BTree<T>&& other, [[maybe_unused]] tags::manualMoveTag) noexcept {
 		*this = std::move(other); 
 		// or this->root = other.root;
