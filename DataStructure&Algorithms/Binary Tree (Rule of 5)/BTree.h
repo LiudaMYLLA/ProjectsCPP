@@ -5,6 +5,7 @@
 #include <utility> // For std::move, std::pair, std::forward
 #include <optional>
 #include <algorithm> // For std::max(first, second);
+#include <variant> // For std::monostate
 
 namespace tags {
 	struct manualMoveTag {};
@@ -46,6 +47,9 @@ public:
 	[[nodiscard]] std::optional<std::pair<Node<T>*, Node<T>*>> min() noexcept;
 	[[nodiscard]] std::optional<std::pair<Node<T>*, Node<T>*>> max() noexcept;
 	[[nodiscard]] int getHeight() const noexcept;
+	std::optional<std::monostate> printPreOrder() const noexcept;
+	std::optional<std::monostate> printInOrder() const noexcept;
+	std::optional<std::monostate> printPostOrder() const noexcept;
 
 private:
 	void insertRecursive(const T& data, Node<T>* node) noexcept;
@@ -58,6 +62,9 @@ private:
 	[[nodiscard]] std::pair<Node<T>*, Node<T>*> minRecursive(Node<T>* node, Node<T>* parent, Node<T>* minNode) noexcept;
 	[[nodiscard]] std::pair<Node<T>*, Node<T>*> maxRecursive(Node<T>* node, Node<T>* parent, Node<T>* maxNode) noexcept;
 	[[nodiscard]] int getHeightRecursive(Node<T>* node) const noexcept;
+	void printPreOrderRecursive(Node<T>* node) const noexcept;
+	void printInOrderRecursive(Node<T>* node) const noexcept;
+	void printPostOrderRecursive(Node<T>* node) const noexcept;
 };
 
 template<typename T>
@@ -471,6 +478,95 @@ template<typename T>
 	return result = getHeightRecursive(root);
 }
 
+template<typename T>
+void BTree<T>::printPreOrderRecursive(Node<T>* node) const noexcept {
+	std::cout << node->data << "\n";
+	if (node->left == nullptr && node->right == nullptr) {
+		return;
+	}
+	if (node->left != nullptr) {
+		printInOrderRecursive(node->left);
+	}
+	
+	if (node->right != nullptr) {
+		printInOrderRecursive(node->right);
+	}
+
+	// Pre-Order: Node -> Left -> Right 
+}
+
+template<typename T>
+std::optional<std::monostate> BTree<T>::printPreOrder() const noexcept {
+	if (empty()) return std::nullopt;
+	if (!empty() && root->left == nullptr && root->right == nullptr) {
+		std::cout << root->data << "\n";
+		return std::monostate{};
+	}
+	printPreOrderRecursive(root);
+	return std::monostate{};
+}
+
+template<typename T>
+void BTree<T>::printInOrderRecursive(Node<T>* node) const noexcept {
+	if (node->left == nullptr && node->right == nullptr) {
+		std::cout << node->data << "\n";
+		return;
+	}
+
+	if (node->left != nullptr) {
+		printInOrderRecursive(node->left);
+	}
+	std::cout << node->data << "\n";
+
+	if (node->right != nullptr) {
+		printInOrderRecursive(node->right);
+	}
+
+	// In-Order: Left -> Node -> Right
+}
+
+template<typename T>
+std::optional<std::monostate> BTree<T>::printInOrder() const noexcept {
+	if (empty()) return std::nullopt;
+	if (!empty() && root->left == nullptr && root->right == nullptr) {
+		std::cout << root->data << "\n";
+		return std::monostate{};
+	}
+	printInOrderRecursive(root);
+	return std::monostate{};
+}
+
+template<typename T>
+void BTree<T>::printPostOrderRecursive(Node<T>* node) const noexcept {
+	if (node->left == nullptr && node->right == nullptr) {
+		std::cout << node->data << "\n";
+		return;
+	}
+
+	if(node->left != nullptr){
+		printPostOrderRecursive(node->left);
+	}
+
+	if (node->right != nullptr) {
+		printPostOrderRecursive(node->right);
+	}
+
+	std::cout << node->data << "\n";
+
+	// Post-Order: Left -> Right -> Node
+}
+
+template<typename T>
+std::optional<std::monostate> BTree<T>::printPostOrder() const noexcept {
+	if (empty()) return std::nullopt;
+	if (!empty() && root->left == nullptr && root->right == nullptr) {
+		std::cout << root->data << "\n";
+		return std::monostate{};
+	}
+	printPostOrderRecursive(root);
+	return std::monostate{};
+}
+
 
 
 // Complete list of methods:
@@ -505,15 +601,18 @@ template<typename T>
 // std::optional<T>, structured bindings
 // 		
 // 10.
-// ++height()		
+// ++height()	
+// 	
 // 11.
-// printInOrder()
-// lambda, std::function, traverse(lambda)
+// +printInOrder()
+// lambda, std::function, traverse(lambda), std::monostate
 // 
 // 12.
-// printPreOrder()
+// +printPreOrder()
 // lambda, std::function, traverse(lambda)
-// 			
+// 	
+// 13.
+// +printPostOrder()			
 // 13.
 // begin()
 // range-for, custom iterator, std::iterator_traits, std::move_iterator
