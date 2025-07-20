@@ -2,7 +2,8 @@
 #include "myException.h"
 #include <iostream>
 #include <string>
-#include <utility> // For std::move, std::pair
+#include <utility> // For std::move, std::pair, std::forward
+#include <optional>
 
 namespace tags {
 	struct manualMoveTag {};
@@ -41,6 +42,9 @@ public:
 	[[nodiscard]] bool empty() const noexcept;
 	void clear() noexcept;
 	[[nodiscard]] int size() const noexcept;
+	[[nodiscard]] std::optional<std::pair<Node<T>*, Node<T>*>> min() noexcept;
+	[[nodiscard]] std::optional<std::pair<Node<T>*, Node<T>*>> max() noexcept;
+
 private:
 	void insertRecursive(const T& data, Node<T>* node) noexcept;
 	void insertMoveRecursive(T&& data, Node<T>* node) noexcept;
@@ -49,6 +53,8 @@ private:
 	std::pair<Node<T>*, Node<T>*> findMaxInSubTreeRecursive(Node<T>* node, Node<T>* parent) noexcept;
 	void clearRecursive(Node<T>* node) noexcept;
 	[[nodiscard]] int size(Node<T>* node) const noexcept;
+	[[nodiscard]] std::pair<Node<T>*, Node<T>*> minRecursive(Node<T>* node, Node<T>* parent, Node<T>* minNode) noexcept;
+	[[nodiscard]] std::pair<Node<T>*, Node<T>*> maxRecursive(Node<T>* node, Node<T>* parent, Node<T>* maxNode) noexcept;
 };
 
 template<typename T>
@@ -354,6 +360,93 @@ template<typename T>
 	return result;
 }
 
+template<typename T>
+[[nodiscard]] std::pair<Node<T>*, Node<T>*> BTree<T>::minRecursive(Node<T>* node, Node<T>* parent, Node<T>* minNode) noexcept{
+	if (node->left == nullptr && node->right == nullptr) {
+		if (node->data < minNode->data) {
+			minNode = node;
+		}
+		return std::make_pair(minNode, parent);
+	}
+
+	if (node->left != nullptr) {
+		auto result = minRecursive(node->left, node, minNode);
+		if (result.first->data < minNode->data) {
+			minNode = result.first;
+			parent = result.second;
+		}
+	}
+
+	if (node->right != nullptr) {
+		auto result = minRecursive(node->right, node, minNode);
+		if (result.first->data < minNode->data) {
+			minNode = result.first;
+			parent = result.second;
+		}
+	}
+
+	if (node->data < minNode->data) {
+		minNode = node;
+	}
+	return std::make_pair(minNode, parent);
+}
+
+template<typename T>
+[[nodiscard]] std::optional<std::pair<Node<T>*, Node<T>*>> BTree<T>::min() noexcept {
+	if (empty()) return std::nullopt;
+	if (!empty() && root->left == nullptr && root->right == nullptr) {
+		return std::make_optional(std::make_pair(root, nullptr));
+	}
+	auto [minNode, parent] = minRecursive(root, nullptr, root); // I am using here structured bindings
+	return std::make_optional(std::make_pair(minNode, parent));
+}
+
+template<typename T>
+[[nodiscard]] std::pair<Node<T>*, Node<T>*> BTree<T>::maxRecursive(Node<T>* node, Node<T>* parent, Node<T>* maxNode) noexcept{
+	if (node->left == nullptr && node->right == nullptr) {
+		if (node->data > maxNode->data) {
+			maxNode = node;
+		}
+		return std::make_pair(maxNode, parent);
+	}
+
+	if (node->left != nullptr) {
+		auto result = maxRecursive(node->left, node, maxNode);
+		if (result.first->data > maxNode->data && node->data < result.first->data ) {
+			maxNode = result.first;
+			parent = node;
+		}
+	}
+	
+	if (node->right != nullptr) {
+		auto result = maxRecursive(node->right, node, maxNode);
+		if (result.first->data > maxNode->data && node->data < result.first->data) {
+			maxNode = result.first;
+			parent = node;
+		}
+	}
+
+	if (node->data > maxNode->data) {
+		maxNode = node;
+	}
+	return std::make_pair(maxNode, parent);
+}
+
+
+template<typename T>
+[[nodiscard]] std::optional<std::pair<Node<T>*, Node<T>*>> BTree<T>::max() noexcept {
+	if (empty()) return std::nullopt;
+	if (!empty() && root->left == nullptr && root->right == nullptr) {
+		return std::make_optional(std::make_pair(root, nullptr));
+	}
+	auto [maxNode, parent] = maxRecursive(root, nullptr, root); // I am using here structured bindings
+	return std::make_optional(std::make_pair(maxNode, parent));
+}
+
+
+
+
+
 
 // Complete list of methods:
 
@@ -380,12 +473,12 @@ template<typename T>
 
 
 
-// 8. min()
+//++ 8. min()
 // std::optional<T>, structured bindings
 // 
-// 9. max()	
+// 9.++ max()	
 // std::optional<T>, structured bindings
-// 		
+//
 // 10.
 // height()	
 // 	constexpr, tail recursion or stack		
@@ -454,4 +547,4 @@ template<typename T>
 // 			
 // 26.
 // from_vector( const std::vector<T>& )
-//	recursive mid-point, std::vector::at, constexpr	
+//	recursive mid-point, std::vector::at, constexpr						
