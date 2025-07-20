@@ -4,6 +4,7 @@
 #include <string>
 #include <utility> // For std::move, std::pair, std::forward
 #include <optional>
+#include <algorithm> // For std::max(first, second);
 
 namespace tags {
 	struct manualMoveTag {};
@@ -44,6 +45,7 @@ public:
 	[[nodiscard]] int size() const noexcept;
 	[[nodiscard]] std::optional<std::pair<Node<T>*, Node<T>*>> min() noexcept;
 	[[nodiscard]] std::optional<std::pair<Node<T>*, Node<T>*>> max() noexcept;
+	[[nodiscard]] int getHeight() const noexcept;
 
 private:
 	void insertRecursive(const T& data, Node<T>* node) noexcept;
@@ -55,6 +57,7 @@ private:
 	[[nodiscard]] int size(Node<T>* node) const noexcept;
 	[[nodiscard]] std::pair<Node<T>*, Node<T>*> minRecursive(Node<T>* node, Node<T>* parent, Node<T>* minNode) noexcept;
 	[[nodiscard]] std::pair<Node<T>*, Node<T>*> maxRecursive(Node<T>* node, Node<T>* parent, Node<T>* maxNode) noexcept;
+	[[nodiscard]] int getHeightRecursive(Node<T>* node) const noexcept;
 };
 
 template<typename T>
@@ -432,7 +435,6 @@ template<typename T>
 	return std::make_pair(maxNode, parent);
 }
 
-
 template<typename T>
 [[nodiscard]] std::optional<std::pair<Node<T>*, Node<T>*>> BTree<T>::max() noexcept {
 	if (empty()) return std::nullopt;
@@ -443,8 +445,31 @@ template<typename T>
 	return std::make_optional(std::make_pair(maxNode, parent));
 }
 
+template<typename T>
+[[nodiscard]] int BTree<T>::getHeightRecursive(Node<T>* node) const noexcept {
+	if (node == nullptr) return 0;
+	return 1 + std::max(getHeightRecursive(node->left), getHeightRecursive(node->right));
+	// Key for deep understanding:
+	// Firstly we diving into the last level 
+	// For calculating D we calculated 2 nullptr nodes, we have got 0
+	// Let's add that 1; Result D is 1, for E would be absolutely the same 
+	// Important thing in B we are decading what biggest left or right sub-tree add + B, so B returns 2
+}
 
+//       A
+//     /   \
+//    B     C
+//   / \     \
+//  D   E     F
+//            /
+//           G
 
+template<typename T>
+[[nodiscard]] int BTree<T>::getHeight() const noexcept {
+	if (empty()) return 0;
+	if (!empty() && root->left == nullptr && root->right == nullptr) return 1;
+	return result = getHeightRecursive(root);
+}
 
 
 
@@ -478,10 +503,9 @@ template<typename T>
 // 
 // 9.++ max()	
 // std::optional<T>, structured bindings
-//
+// 		
 // 10.
-// height()	
-// 	constexpr, tail recursion or stack		
+// ++height()		
 // 11.
 // printInOrder()
 // lambda, std::function, traverse(lambda)
