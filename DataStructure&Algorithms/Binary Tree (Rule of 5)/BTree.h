@@ -6,9 +6,11 @@
 #include <optional>
 #include <algorithm> // For std::max(first, second);
 #include <variant> // For std::monostate
+#include <functional> // For std::function
 
 namespace tags {
 	struct manualMoveTag {};
+	struct postTag {};
 }
 
 template<typename T>
@@ -49,7 +51,8 @@ public:
 	[[nodiscard]] int getHeight() const noexcept;
 	std::optional<std::monostate> printPreOrder() const noexcept;
 	std::optional<std::monostate> printInOrder() const noexcept;
-	std::optional<std::monostate> printPostOrder() const noexcept;
+	[[deprecated]] std::optional<std::monostate> printPostOrder(tags::postTag) const noexcept;
+	std::optional<std::monostate> printPostOrderLambda() const noexcept;
 
 private:
 	void insertRecursive(const T& data, Node<T>* node) noexcept;
@@ -64,8 +67,9 @@ private:
 	[[nodiscard]] int getHeightRecursive(Node<T>* node) const noexcept;
 	void printPreOrderRecursive(Node<T>* node) const noexcept;
 	void printInOrderRecursive(Node<T>* node) const noexcept;
-	void printPostOrderRecursive(Node<T>* node) const noexcept;
-};
+	[[deprecated]] void printPostOrderRecursive(Node<T>* node, tags::postTag) const noexcept;
+	std::optional<std::monostate> traversePostOrderLambda(Node<T>* node, std::function<void(const Node<T>* node)> func) const noexcept;
+}; 
 
 template<typename T>
 BTree<T>::BTree(BTree&& other) noexcept : root(other.root) {
@@ -475,7 +479,7 @@ template<typename T>
 [[nodiscard]] int BTree<T>::getHeight() const noexcept {
 	if (empty()) return 0;
 	if (!empty() && root->left == nullptr && root->right == nullptr) return 1;
-	return result = getHeightRecursive(root);
+	return getHeightRecursive(root);
 }
 
 template<typename T>
@@ -537,7 +541,7 @@ std::optional<std::monostate> BTree<T>::printInOrder() const noexcept {
 }
 
 template<typename T>
-void BTree<T>::printPostOrderRecursive(Node<T>* node) const noexcept {
+[[deprecated]] void BTree<T>::printPostOrderRecursive(Node<T>* node, tags::postTag) const noexcept {
 	if (node->left == nullptr && node->right == nullptr) {
 		std::cout << node->data << "\n";
 		return;
@@ -557,7 +561,7 @@ void BTree<T>::printPostOrderRecursive(Node<T>* node) const noexcept {
 }
 
 template<typename T>
-std::optional<std::monostate> BTree<T>::printPostOrder() const noexcept {
+[[deprecated]] std::optional<std::monostate> BTree<T>::printPostOrder(tags::postTag) const noexcept {
 	if (empty()) return std::nullopt;
 	if (!empty() && root->left == nullptr && root->right == nullptr) {
 		std::cout << root->data << "\n";
@@ -565,6 +569,37 @@ std::optional<std::monostate> BTree<T>::printPostOrder() const noexcept {
 	}
 	printPostOrderRecursive(root);
 	return std::monostate{};
+}
+
+template<typename T>
+std::optional<std::monostate> BTree<T>::printPostOrderLambda() const noexcept {
+if (empty()) return std::nullopt;
+
+	std::function<void(const Node<T>* node)> myPrintLambda = [](const Node<T>* node) -> void {
+		std::cout << node->data << "\n";
+		};
+
+	traversePostOrderLambda(root, myPrintLambda);
+}
+
+template<typename T>
+std::optional<std::monostate> BTree<T>::traversePostOrderLambda(Node<T>* node, std::function<void(const Node<T>* node)> func) const noexcept {
+
+	if (node->left == nullptr && node->right == nullptr) {
+		func(node);
+		return std::nullopt;
+	}
+
+	if (node->left != nullptr) {
+		traversePostOrderLambda(node->left, func);
+	}
+
+	if (node->right != nullptr) {
+		traversePostOrderLambda(node->right, func);
+	}
+
+	func(node);
+	// Post-Order: Left -> Right -> Node
 }
 
 
