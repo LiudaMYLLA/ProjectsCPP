@@ -647,62 +647,64 @@ std::optional<std::monostate> BTree<T>::traversePostOrderLambda(Node<T>* node, s
 // lambda, std::function, traverse(lambda)
 // 	
 // 13.
-// +printPostOrder()			
-// 13.
+// ++printPostOrder()	
+// lambda, std::function, traverse(lambda)
+//
+// 14.
 // begin()
 // range-for, custom iterator, std::iterator_traits, std::move_iterator
 // 
-// 14.
+// 15.
 // end()
 // range-for, custom iterator, std::iterator_traits, std::move_iterator
 // 
-// 15.			
+// 16.			
 // emplace(args...)
 // variadic templates, std::forward, T&&, emplace
 // 			
-// 16.
+// 17.
 // operator==
 // SFINAE, constexpr, std::tie
 // 
-// 17.
+// 18.
 // operator!=
 // SFINAE, constexpr, std::tie	
 
 
 
 
-// 18.
+// 19.
 // traverse(λ)	
 // std::function, lambda, std::bind, concepts(C++20)
 // 
-// 19.			
+// 20.			
 // balance()
 // to_vector + from_sorted_vector, std::sort, constexpr
 // 				
-// 20.
+// 21.
 // copy()	
 // deep copy, clone_subtree
 // 
-// 21.				
+// 22.				
 // clone_subtree(Node*)	
 // RAII, move	
 // 
-// 22.
+// 23.
 // node_count()
 // constexpr, fold expressions
 // 
-// 23.
+// 24.
 // leaf_count()	
 // constexpr, fold expressions
 // 			
-// 24.
+// 25.
 // is_balanced()
 // std::pair, structured bindings	
 // 		
-// 25.
+// 26.
 // to_vector()	
 // std::vector<T>, inorder traversal, emplace_back
 // 			
-// 26.
+// 27.
 // from_vector( const std::vector<T>& )
 //	recursive mid-point, std::vector::at, constexpr						
