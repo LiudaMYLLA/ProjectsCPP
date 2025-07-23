@@ -6,7 +6,9 @@
 #include <optional>
 #include <algorithm> // For std::max(first, second);
 #include <variant> // For std::monostate
-#include <functional> // For std::function
+#include <functional>
+#include <vector>
+#include <type_traits> // For std::is_arithmetic_v<Type>
 
 namespace tags {
 	struct manualMoveTag {};
@@ -53,6 +55,9 @@ public:
 	std::optional<std::monostate> printInOrder() const noexcept;
 	[[deprecated]] std::optional<std::monostate> printPostOrder(tags::postTag) const noexcept;
 	std::optional<std::monostate> printPostOrderLambda() const noexcept;
+	std::optional<std::vector<T>> saveDataInVectorLambda() const noexcept;
+	std::optional<int> counterNodesLambda() const noexcept;
+	std::optional<T> sumLambda() const noexcept;
 
 private:
 	void insertRecursive(const T& data, Node<T>* node) noexcept;
@@ -580,10 +585,59 @@ if (empty()) return std::nullopt;
 		};
 
 	traversePostOrderLambda(root, myPrintLambda);
+	return std::nullopt;
 }
 
 template<typename T>
-std::optional<std::monostate> BTree<T>::traversePostOrderLambda(Node<T>* node, std::function<void(const Node<T>* node)> func) const noexcept {
+std::optional<std::vector<T>> BTree<T>::saveDataInVectorLambda() const noexcept {
+	if (empty()) return std::nullopt;
+
+	std::vector<T> vec;
+
+	std::function<void(const Node<T>* node)> mySaveInVectorLambda = [&vec](const Node<T>* node) -> void {
+		vec.push_back(node->data);
+		};
+
+	traversePostOrderLambda(root, mySaveInVectorLambda);
+
+	return vec;
+}
+
+template<typename T>
+std::optional<int> BTree<T>::counterNodesLambda() const noexcept {
+	if (empty()) return std::nullopt;
+	int counter = 0;
+	std::function<void(const Node<T>* node)> myCounterLambda = [&counter](const Node<T>* node) -> void {
+		if (node != nullptr) {
+			counter++;
+		}
+		};
+	traversePostOrderLambda(root, myCounterLambda);
+
+	return counter;
+}
+
+template<typename T>
+std::optional<T> BTree<T>::sumLambda() const noexcept {
+	if constexpr (std::is_arithmetic_v<T>) {
+		if (empty()) return std::nullopt;
+		T sum = 0;
+
+		std::function<void(const Node<T>* node)> mySumLambda = [&sum](const Node<T>* node) -> void {
+			sum += node->data;
+			};
+
+		traversePostOrderLambda(root, mySumLambda);
+		return sum;
+	}
+	else {
+		return std::nullopt;
+	}
+}
+
+template<typename T>
+std::optional<std::monostate> 
+BTree<T>::traversePostOrderLambda(Node<T>* node, std::function<void(const Node<T>* node)> func) const noexcept {
 
 	if (node->left == nullptr && node->right == nullptr) {
 		func(node);
@@ -599,8 +653,11 @@ std::optional<std::monostate> BTree<T>::traversePostOrderLambda(Node<T>* node, s
 	}
 
 	func(node);
-	// Post-Order: Left -> Right -> Node
+	return std::nullopt;
+	// Post-Order: Left->Right->Node
 }
+
+
 
 
 
