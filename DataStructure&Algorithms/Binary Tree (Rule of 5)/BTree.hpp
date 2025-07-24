@@ -1,5 +1,5 @@
-#include "Node.h"
-#include "myException.h"
+#include "Node.hpp"
+#include "myException.hpp"
 #include <iostream>
 #include <string>
 #include <utility> // For std::move, std::pair, std::forward
