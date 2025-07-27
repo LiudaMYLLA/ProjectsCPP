@@ -1,5 +1,6 @@
 #include "Node.hpp"
 #include "myException.hpp"
+#include "Iterator.hpp"
 #include <iostream>
 #include <string>
 #include <utility> // For std::move, std::pair, std::forward
@@ -58,6 +59,13 @@ public:
 	std::optional<std::vector<T>> saveDataInVectorLambda() const noexcept;
 	std::optional<int> counterNodesLambda() const noexcept;
 	std::optional<T> sumLambda() const noexcept;
+
+	Iterator<T> begin() const noexcept {
+		return Iterator<T>(root);
+	}
+	Iterator<T> end() const noexcept {
+		return Iterator<T>(nullptr);
+	}
 
 private:
 	void insertRecursive(const T& data, Node<T>* node) noexcept;
@@ -659,8 +667,6 @@ BTree<T>::traversePostOrderLambda(Node<T>* node, std::function<void(const Node<T
 
 
 
-
-
 // Complete list of methods:
 
 //++ 1. insert( const T& )		
@@ -696,11 +702,11 @@ BTree<T>::traversePostOrderLambda(Node<T>* node, std::function<void(const Node<T
 // ++height()	
 // 	
 // 11.
-// +printInOrder()
+// ++printInOrder()
 // lambda, std::function, traverse(lambda), std::monostate
 // 
 // 12.
-// +printPreOrder()
+// ++printPreOrder()
 // lambda, std::function, traverse(lambda)
 // 	
 // 13.
@@ -708,11 +714,11 @@ BTree<T>::traversePostOrderLambda(Node<T>* node, std::function<void(const Node<T
 // lambda, std::function, traverse(lambda)
 //
 // 14.
-// begin()
+// +begin()
 // range-for, custom iterator, std::iterator_traits, std::move_iterator
 // 
 // 15.
-// end()
+// +end()
 // range-for, custom iterator, std::iterator_traits, std::move_iterator
 // 
 // 16.			
