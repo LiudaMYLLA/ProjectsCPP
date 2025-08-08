@@ -1,13 +1,19 @@
 #pragma once
 #include <iostream>
 #include <stack>
+#include <iterator>
+#include <cstddef>
 #include "Node.hpp"
-
 
 template<typename T>
 class Iterator {
 public:
-	Iterator() {}
+	using value_type = T;
+	using pointer = T*;
+	using reference = T&;
+	using difference_type = std::ptrdiff_t;
+	using iterator_category = std::forward_iterator_tag;
+
 	Iterator(Node<T>* _node) : node(_node) {
 		while (node != nullptr) {
 			stack.push(node); // For this stack std::stack <Node<T>*> stack; that belongs to obj it we are creating 
@@ -88,3 +94,5 @@ void Iterator<T>::operator++() { // we will return reference on the current obj
 		}
 	}
 }
+
+
