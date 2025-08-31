@@ -21,7 +21,7 @@ class [[nodiscard]] BTree {
 private:
 	Node<T>* root = nullptr;
 public:
-	// Rule of 5
+	// Rule of 5 / Big 6
 	BTree() noexcept = default;
 
 	BTree(const BTree& other) noexcept; //deep copy
@@ -59,6 +59,7 @@ public:
 	std::optional<std::vector<T>> saveDataInVectorLambda() const noexcept;
 	std::optional<int> counterNodesLambda() const noexcept;
 	std::optional<T> sumLambda() const noexcept;
+	[[nodiscard]] void emplace(Args&&... args) noexcept;
 
 	Iterator<T> begin() const noexcept {
 		return Iterator<T>(root);
@@ -82,6 +83,7 @@ private:
 	void printInOrderRecursive(Node<T>* node) const noexcept;
 	[[deprecated]] void printPostOrderRecursive(Node<T>* node, tags::postTag) const noexcept;
 	std::optional<std::monostate> traversePostOrderLambda(Node<T>* node, std::function<void(const Node<T>* node)> func) const noexcept;
+	[[nodiscard]] void emplaceRecursive(First&& first, Rest&&... rest, Node<T>* node) noexcept;
 }; 
 
 template<typename T>
@@ -665,6 +667,41 @@ BTree<T>::traversePostOrderLambda(Node<T>* node, std::function<void(const Node<T
 	// Post-Order: Left->Right->Node
 }
 
+// Variadic templates
+template<typename First, typename... Rest>
+[[nodiscard]] void BTree<T>::emplaceRecursive(First&& first, Rest&&... rest, Node<T>* node) noexcept{
+	if (first >= node->data) {
+		if (node->right == nullptr) {
+			Node<T>* newNode = new Node<T>(std::forward<First>(first), std::forward<Rest>(rest)...); // calling parametarized constructor
+			node->right = newNode;
+			return;
+		}
+		emplaceRecursive(std::forward<First>(first), std::forward<Rest>(rest)..., node->right);
+	}
+	else if (first < node->data) {
+		if (node->left == nullptr) {
+			Node<T>* newNode = new Node<T>(std::forward<First>(first), std::forward<Rest>(rest)...);
+			node->left = newNode;
+			return;
+		}
+		emplaceRecursive(std::forward<First>(first), std::forward<Rest>(rest)..., node->left);
+	}
+}
+
+template<typename... TypesPacName>
+[[nodiscard]] void BTree<T>::emplace(TypesPacName&&... paramPacName) noexcept{
+	if (root == nullptr) {
+		Node<T>* newNode = new Node<T>(std::forward<TypesPacName>(paramPacName)...);
+		root = newNode;
+	}
+	else {
+		insertMoveRecursive(std::forward<TypesPacName>(paramPacName)..., root);
+	}
+}
+// ... :tells to the compiler we are declarating "packet of types", so
+// TypesPacName is name of packet that containce any amount of types
+// Strict syntax: init op ... op pack
+
 
 
 // Complete list of methods:
@@ -714,15 +751,15 @@ BTree<T>::traversePostOrderLambda(Node<T>* node, std::function<void(const Node<T
 // lambda, std::function, traverse(lambda)
 //
 // 14.
-// +begin()
+// ++begin()
 // range-for, custom iterator, std::iterator_traits, std::move_iterator
 // 
 // 15.
-// +end()
+// ++end()
 // range-for, custom iterator, std::iterator_traits, std::move_iterator
 // 
 // 16.			
-// emplace(args...)
+// ++emplace(args...)
 // variadic templates, std::forward, T&&, emplace
 // 			
 // 17.
@@ -771,3 +808,4 @@ BTree<T>::traversePostOrderLambda(Node<T>* node, std::function<void(const Node<T
 // 27.
 // from_vector( const std::vector<T>& )
 //	recursive mid-point, std::vector::at, constexpr						
+
