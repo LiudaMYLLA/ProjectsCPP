@@ -41,7 +41,7 @@ int main() {
 
 	people.insert(p1);
 	// WIth variadic templates and fold exprasions possible becomes
-	//people.emplace(3, "Liuda", 20);
+	people.emplace(3, "Liuda", 20);
 	
 
 	Iterator<int> it = my_tree.begin();
@@ -122,4 +122,5 @@ int main() {
 	}
 	std::cout << "\n";
 }
+
 
