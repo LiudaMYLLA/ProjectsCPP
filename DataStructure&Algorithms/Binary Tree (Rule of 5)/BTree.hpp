@@ -9,7 +9,7 @@
 #include <variant> // For std::monostate
 #include <functional>
 #include <vector>
-#include <type_traits> // For std::is_arithmetic_v<Type>
+#include <type_traits> // For std::is_arithmetic_v<Type>, std::enable_if
 
 namespace tags {
 	struct manualMoveTag {};
@@ -68,6 +68,8 @@ public:
 		return Iterator<T>(nullptr);
 	}
 
+	[[nodiscard]] bool operator==(const BTree<T>& other)const noexcept;
+	[[nodiscard]] bool operator!=(const BTree<T>& other)const noexcept;
 private:
 	void insertRecursive(const T& data, Node<T>* node) noexcept;
 	void insertMoveRecursive(T&& data, Node<T>* node) noexcept;
@@ -702,6 +704,33 @@ template<typename... TypesPacName>
 // TypesPacName is name of packet that containce any amount of types
 // Strict syntax: init op ... op pack
 
+template<typename T>
+concept ArithmeticComparable = std::equality_comparable<T> && std::is_arithmetic_v<T>;
+
+template<ArithmeticComparable T>
+[[nodiscard]] bool BTree<T>::operator==(const BTree<T>& other)const noexcept {
+	if (this->empty() != other->empty()) {
+		return false;
+	}
+	Iterator<T> it1 = this->begin();
+	Iterator<T> it2 = other.begin();
+	for (it1, it2; it1 != this->end() && it2 != other.end(); ++it1, ++it2) {
+		if (*it1 != *it2) {
+			return false;
+		}
+	}
+	return true;
+}
+
+template<ArithmeticComparable T>
+[[nodiscard]] bool BTree<T>::operator!=(const BTree<T>& other)const noexcept {
+	if (*this == other) {
+		return false;
+	}
+	else {
+		return true;
+	}
+}
 
 
 // Complete list of methods:
@@ -720,15 +749,13 @@ template<typename... TypesPacName>
 // 
 //++ 5. clear()		
 // 	RAII	
-// 
+//    
 //++ 6. size() const
 // 	[[nodiscard]]
 // 		
 //++ 7. empty() const
 //	[[nodiscard]], noexcept	
-
-
-
+// 
 //++ 8. min()
 // std::optional<T>, structured bindings
 // 
@@ -763,15 +790,13 @@ template<typename... TypesPacName>
 // variadic templates, std::forward, T&&, emplace
 // 			
 // 17.
-// operator==
+// +operator==
 // SFINAE, constexpr, std::tie
 // 
 // 18.
-// operator!=
+// +operator!=
 // SFINAE, constexpr, std::tie	
-
-
-
+// 
 
 // 19.
 // traverse(λ)	
@@ -808,4 +833,5 @@ template<typename... TypesPacName>
 // 27.
 // from_vector( const std::vector<T>& )
 //	recursive mid-point, std::vector::at, constexpr						
+
 
